@@ -19,6 +19,7 @@ type Doc struct {
 	Comment string
 	Inputs  []Input
 	Outputs []Output
+	Resources []Resource
 }
 
 // HasComment indicates if the document has a comment.
@@ -34,6 +35,11 @@ func (d *Doc) HasInputs() bool {
 // HasOutputs indicates if the document has outputs.
 func (d *Doc) HasOutputs() bool {
 	return len(d.Outputs) > 0
+}
+
+// HasResources indicates if the document has resources.
+func (d *Doc) HasResources() bool {
+	return len(d.Resources) > 0
 }
 
 // Value represents a Terraform value.
@@ -94,6 +100,7 @@ func Create(files map[string]*ast.File) *Doc {
 
 		doc.Inputs = append(doc.Inputs, getInputs(objects)...)
 		doc.Outputs = append(doc.Outputs, getOutputs(objects)...)
+		doc.Resources = append(doc.Resources, getResources(objects)...)
 
 		filename := filepath.Base(name)
 		comments := file.Comments
@@ -138,6 +145,24 @@ func getOutputs(list *ast.ObjectList) []Output {
 
 	return result
 }
+
+// getResources returns a list of resources from an ast.ObjectList.
+func getResources(list *ast.ObjectList) []Resource {
+	var result []Resource
+
+	for _, item := range list.Items {
+		if isItemOfKindResource(item) {
+			result = append(result, Resource{
+				Name: getItemResourceName(item),
+				Type: getItemResourceType(item),
+			})
+		}
+	}
+
+	return result
+}
+
+
 
 func getItemByKey(items []*ast.ObjectItem, key string) *Value {
 	for _, item := range items {
@@ -231,6 +256,24 @@ func getItemName(item *ast.ObjectItem) string {
 	return name
 }
 
+func getItemResourceName(item *ast.ObjectItem) string {
+	val, err := strconv.Unquote(item.Keys[2].Token.Text)
+	if err != nil {
+		val = item.Keys[2].Token.Text
+	}
+
+	return val
+}
+
+func getItemResourceType(item *ast.ObjectItem) string {
+	val, err := strconv.Unquote(item.Keys[1].Token.Text)
+	if err != nil {
+		val = item.Keys[1].Token.Text
+	}
+
+	return val
+}
+
 func getItemType(item *ast.ObjectItem) string {
 	var result string
 
@@ -265,6 +308,10 @@ func isItemOfKindOutput(item *ast.ObjectItem) bool {
 
 func isItemOfKindVariable(item *ast.ObjectItem) bool {
 	return isItemOfKind(item, "variable")
+}
+
+func isItemOfKindResource(item *ast.ObjectItem) bool {
+	return isItemOfKind(item, "resource")
 }
 
 // Header returns the header comment from the list

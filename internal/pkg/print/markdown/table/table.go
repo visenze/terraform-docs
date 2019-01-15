@@ -43,6 +43,15 @@ func Print(document *doc.Doc, settings settings.Settings) (string, error) {
 		printOutputs(&buffer, document.Outputs, settings)
 	}
 
+	buffer.WriteString("\n")
+	if document.HasResources() {
+		if settings.Has(print.WithSortByName) {
+			doc.SortResourcesByType(document.Resources)
+		}
+
+		printResources(&buffer, document.Resources, settings)
+	}
+
 	return markdown.Sanitize(buffer.String()), nil
 }
 
@@ -112,5 +121,18 @@ func printOutputs(buffer *bytes.Buffer, outputs []doc.Output, settings settings.
 			fmt.Sprintf("| %s | %s |\n",
 				strings.Replace(output.Name, "_", "\\_", -1),
 				markdown.ConvertMultiLineText(output.Description)))
+	}
+}
+
+func printResources(buffer *bytes.Buffer, resources []doc.Resource, settings settings.Settings) {
+	buffer.WriteString("## Resources\n\n")
+	buffer.WriteString("| Type |    Name     |\n")
+	buffer.WriteString("|------|-------------|\n")
+
+	for _, resource := range resources {
+		buffer.WriteString(
+			fmt.Sprintf("| %s | %s |\n",
+				strings.Replace(resource.Type, "_", "\\_", -1),
+				strings.Replace(resource.Name, "_", "\\_", -1)))
 	}
 }
