@@ -20,6 +20,7 @@ type Doc struct {
 	Inputs  []Input
 	Outputs []Output
 	Resources []Resource
+	Modules []Module
 }
 
 // HasComment indicates if the document has a comment.
@@ -40,6 +41,11 @@ func (d *Doc) HasOutputs() bool {
 // HasResources indicates if the document has resources.
 func (d *Doc) HasResources() bool {
 	return len(d.Resources) > 0
+}
+
+// HasModules indicates if the document has modules.
+func (d *Doc) HasModules() bool {
+	return len(d.Modules) > 0
 }
 
 // Value represents a Terraform value.
@@ -101,6 +107,7 @@ func Create(files map[string]*ast.File) *Doc {
 		doc.Inputs = append(doc.Inputs, getInputs(objects)...)
 		doc.Outputs = append(doc.Outputs, getOutputs(objects)...)
 		doc.Resources = append(doc.Resources, getResources(objects)...)
+		doc.Modules = append(doc.Modules, getModules(objects)...)
 
 		filename := filepath.Base(name)
 		comments := file.Comments
@@ -155,6 +162,23 @@ func getResources(list *ast.ObjectList) []Resource {
 			result = append(result, Resource{
 				Name: getItemResourceName(item),
 				Type: getItemResourceType(item),
+			})
+		}
+	}
+
+	return result
+}
+
+// getModules returns a list of resources from an ast.ObjectList.
+func getModules(list *ast.ObjectList) []Module {
+	var result []Module
+
+	for _, item := range list.Items {
+		if isItemOfKindModule(item) {
+			result = append(result, Module{
+				Name:    getItemModuleName(item),
+				Type:    getItemModuleType(item),
+				Version: getItemModuleVersion(item),
 			})
 		}
 	}
@@ -274,6 +298,42 @@ func getItemResourceType(item *ast.ObjectItem) string {
 	return val
 }
 
+func getItemModuleName(item *ast.ObjectItem) string {
+	val, err := strconv.Unquote(item.Keys[1].Token.Text)
+	if err != nil {
+		val = item.Keys[1].Token.Text
+	}
+
+	return val
+}
+
+func getItemModuleType(item *ast.ObjectItem) string {
+	items := item.Val.(*ast.ObjectType).List.Items
+	val := getItemByKey(items, "source").Value.(string)
+
+	strToSearch := "terraform/modules"
+
+	index := strings.Index(val, strToSearch)
+	if index  >= 0 {
+		val = val[index + len(strToSearch) + 1:]
+	}
+
+	return val
+}
+
+func getItemModuleVersion(item *ast.ObjectItem) string {
+	var version string
+
+	items := item.Val.(*ast.ObjectType).List.Items
+	val := getItemByKey(items, "version")
+
+	if val != nil {
+		version = val.Value.(string)
+	}
+
+	return version
+}
+
 func getItemType(item *ast.ObjectItem) string {
 	var result string
 
@@ -312,6 +372,10 @@ func isItemOfKindVariable(item *ast.ObjectItem) bool {
 
 func isItemOfKindResource(item *ast.ObjectItem) bool {
 	return isItemOfKind(item, "resource")
+}
+
+func isItemOfKindModule(item *ast.ObjectItem) bool {
+	return isItemOfKind(item, "module")
 }
 
 // Header returns the header comment from the list

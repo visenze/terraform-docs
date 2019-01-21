@@ -44,6 +44,15 @@ func Print(document *doc.Doc, settings settings.Settings) (string, error) {
 	}
 
 	buffer.WriteString("\n")
+	if document.HasModules() {
+		if settings.Has(print.WithSortByName) {
+			doc.SortModuleByType(document.Modules)
+		}
+
+		printModules(&buffer, document.Modules, settings)
+	}
+
+	buffer.WriteString("\n")
 	if document.HasResources() {
 		if settings.Has(print.WithSortByName) {
 			doc.SortResourcesByType(document.Resources)
@@ -134,5 +143,19 @@ func printResources(buffer *bytes.Buffer, resources []doc.Resource, settings set
 			fmt.Sprintf("| %s | %s |\n",
 				strings.Replace(resource.Type, "_", "\\_", -1),
 				strings.Replace(resource.Name, "_", "\\_", -1)))
+	}
+}
+
+func printModules(buffer *bytes.Buffer, modules []doc.Module, settings settings.Settings) {
+	buffer.WriteString("## Modules\n\n")
+	buffer.WriteString("| Type |    Name     |   Version   |\n")
+	buffer.WriteString("|------|-------------|-------------|\n")
+
+	for _, module := range modules {
+		buffer.WriteString(
+			fmt.Sprintf("| %s | %s | %s |\n",
+				strings.Replace(module.Type, "_", "\\_", -1),
+				strings.Replace(module.Name, "_", "\\_", -1),
+				strings.Replace(module.Version, "_", "\\_", -1)))
 	}
 }
