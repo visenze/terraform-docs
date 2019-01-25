@@ -311,7 +311,7 @@ func getItemModuleType(item *ast.ObjectItem) string {
 	items := item.Val.(*ast.ObjectType).List.Items
 	val := getItemByKey(items, "source").Value.(string)
 
-	strToSearch := "terraform/modules"
+	strToSearch := "/modules"
 
 	index := strings.Index(val, strToSearch)
 	if index  >= 0 {
