@@ -24,7 +24,14 @@ func (a resourcesSortedByType) Swap(i, j int) {
 }
 
 func (a resourcesSortedByType) Less(i, j int) bool {
-	return a[i].Type < a[j].Type
+	var result bool
+
+	if a[i].Type != a[j].Type {
+		result = a[i].Type < a[j].Type
+	} else {
+		result = a[i].Name < a[j].Name
+	}
+	return result
 }
 
 // SortResourcesByName sorts a list of outputs by name.

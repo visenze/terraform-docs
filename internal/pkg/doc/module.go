@@ -26,7 +26,14 @@ func (a modulesSortedByType) Swap(i, j int) {
 }
 
 func (a modulesSortedByType) Less(i, j int) bool {
-	return a[i].Type < a[j].Type
+	var result bool
+
+	if a[i].Type != a[j].Type {
+		result = a[i].Type < a[j].Type
+	} else {
+		result = a[i].Name < a[j].Name
+	}
+	return result
 }
 
 // SortModuleByType sorts a list of modules by type.
