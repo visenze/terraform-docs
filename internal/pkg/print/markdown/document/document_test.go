@@ -6,13 +6,14 @@ import (
 	"github.com/segmentio/terraform-docs/internal/pkg/doc"
 	"github.com/segmentio/terraform-docs/internal/pkg/print"
 	"github.com/segmentio/terraform-docs/internal/pkg/print/markdown/document"
-	"github.com/segmentio/terraform-docs/internal/pkg/settings"
+	_settings "github.com/segmentio/terraform-docs/internal/pkg/settings"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPrint(t *testing.T) {
 	doc := doc.TestDoc(t, "../..")
-	var settings settings.Settings
+
+	var settings = &_settings.Settings{}
 
 	actual, err := document.Print(doc, settings)
 	if err != nil {
@@ -30,8 +31,9 @@ func TestPrint(t *testing.T) {
 func TestWithAggregateTypeDefaults(t *testing.T) {
 	doc := doc.TestDoc(t, "../..")
 
-	var settings settings.Settings
-	settings.Add(print.WithAggregateTypeDefaults)
+	var settings = &_settings.Settings{
+		AggregateTypeDefaults: true,
+	}
 
 	actual, err := document.Print(doc, settings)
 	if err != nil {
@@ -49,8 +51,9 @@ func TestWithAggregateTypeDefaults(t *testing.T) {
 func TestPrintWithRequired(t *testing.T) {
 	doc := doc.TestDoc(t, "../..")
 
-	var settings settings.Settings
-	settings.Add(print.WithRequired)
+	var settings = &_settings.Settings{
+		ShowRequired: true,
+	}
 
 	actual, err := document.Print(doc, settings)
 	if err != nil {
@@ -68,8 +71,9 @@ func TestPrintWithRequired(t *testing.T) {
 func TestPrintWithSortByName(t *testing.T) {
 	doc := doc.TestDoc(t, "../..")
 
-	var settings settings.Settings
-	settings.Add(print.WithSortByName)
+	var settings = &_settings.Settings{
+		SortByName: true,
+	}
 
 	actual, err := document.Print(doc, settings)
 	if err != nil {
@@ -87,9 +91,10 @@ func TestPrintWithSortByName(t *testing.T) {
 func TestPrintWithSortInputsByRequired(t *testing.T) {
 	doc := doc.TestDoc(t, "../..")
 
-	var settings settings.Settings
-	settings.Add(print.WithSortByName)
-	settings.Add(print.WithSortInputsByRequired)
+	var settings = &_settings.Settings{
+		SortByName:           true,
+		SortInputsByRequired: true,
+	}
 
 	actual, err := document.Print(doc, settings)
 	if err != nil {
@@ -97,6 +102,86 @@ func TestPrintWithSortInputsByRequired(t *testing.T) {
 	}
 
 	expected, err := print.ReadGoldenFile("document-WithSortInputsByRequired")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, expected, actual)
+}
+
+func TestPrintWithEscapeName(t *testing.T) {
+	doc := doc.TestDoc(t, "../..")
+
+	var settings = &_settings.Settings{
+		EscapeMarkdown: true,
+	}
+
+	actual, err := document.Print(doc, settings)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected, err := print.ReadGoldenFile("document-WithEscapeName")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, expected, actual)
+}
+
+func TestPrintWithIndentationBellowAllowed(t *testing.T) {
+	doc := doc.TestDoc(t, "../..")
+
+	var settings = &_settings.Settings{
+		MarkdownIndent: 0,
+	}
+
+	actual, err := document.Print(doc, settings)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected, err := print.ReadGoldenFile("document-WithIndentationBellowAllowed")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, expected, actual)
+}
+
+func TestPrintWithIndentationAboveAllowed(t *testing.T) {
+	doc := doc.TestDoc(t, "../..")
+
+	var settings = &_settings.Settings{
+		MarkdownIndent: 10,
+	}
+
+	actual, err := document.Print(doc, settings)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected, err := print.ReadGoldenFile("document-WithIndentationAboveAllowed")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, expected, actual)
+}
+
+func TestPrintWithIndentationOfFour(t *testing.T) {
+	doc := doc.TestDoc(t, "../..")
+
+	var settings = &_settings.Settings{
+		MarkdownIndent: 4,
+	}
+
+	actual, err := document.Print(doc, settings)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected, err := print.ReadGoldenFile("document-WithIndentationOfFour")
 	if err != nil {
 		t.Fatal(err)
 	}

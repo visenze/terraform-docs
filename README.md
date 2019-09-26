@@ -11,6 +11,7 @@
 - [Maintenance](#maintenance)
 - [Installation](#installation)
 - [Getting Started](#getting-started)
+- [Development Requirements](#development-requirements)
 - [License](#license)
 
 ## Maintenance
@@ -32,6 +33,22 @@ brew install terraform-docs
 ```
 
 For other platforms, please have a look at our [binary releases](https://github.com/segmentio/terraform-docs/releases).
+
+## Code Completion
+
+The code completion for `bash` or `zsh` can be installed using:
+
+``` bash
+source <(terraform-docs completion bash)
+```
+
+or
+
+``` bash
+source <(terraform-docs completion zsh)
+```
+
+To make this change permenant, the above command can be added to you `~/.profile`.
 
 ## Getting Started
 
@@ -58,6 +75,12 @@ Generate a Markdown document from the Terraform configuration in folder `./examp
 ```bash
 terraform-docs markdown document ./examples
 ```
+
+## Development Requirements
+
+- Go 1.11+
+- [git-chlog](https://github.com/git-chglog/git-chglog)
+- [golangci-lint](https://github.com/golangci/golangci-lint)
 
 ## License
 

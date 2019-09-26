@@ -4,15 +4,15 @@ import (
 	"testing"
 
 	"github.com/segmentio/terraform-docs/internal/pkg/doc"
-	"github.com/segmentio/terraform-docs/internal/pkg/print"
 	"github.com/segmentio/terraform-docs/internal/pkg/print/pretty"
-	"github.com/segmentio/terraform-docs/internal/pkg/settings"
+	_settings "github.com/segmentio/terraform-docs/internal/pkg/settings"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPretty(t *testing.T) {
 	doc := doc.TestDoc(t, "..")
-	var settings settings.Settings
+
+	var settings = &_settings.Settings{}
 
 	actual, err := pretty.Print(doc, settings)
 	if err != nil {
@@ -75,6 +75,9 @@ func TestPretty(t *testing.T) {
 			"  " + sgr_color_1 + "var.input_with_underscores" + sgr_reset + " (required)\n" +
 			"  " + sgr_color_2 + "A variable with underscores." + sgr_reset + "\n" +
 			"\n" +
+			"  " + sgr_color_1 + "var.input-with-pipe" + sgr_reset + " (\"v1\")\n" +
+			"  " + sgr_color_2 + "It includes v1 | v2 | v3" + sgr_reset + "\n" +
+			"\n" +
 			"\n" +
 			"\n" +
 			"  " + sgr_color_1 + "output.unquoted" + sgr_reset + "\n" +
@@ -94,8 +97,9 @@ func TestPretty(t *testing.T) {
 func TestPrettyWithWithAggregateTypeDefaults(t *testing.T) {
 	doc := doc.TestDoc(t, "..")
 
-	var settings settings.Settings
-	settings.Add(print.WithAggregateTypeDefaults)
+	var settings = &_settings.Settings{
+		AggregateTypeDefaults: true,
+	}
 
 	actual, err := pretty.Print(doc, settings)
 	if err != nil {
@@ -158,6 +162,9 @@ func TestPrettyWithWithAggregateTypeDefaults(t *testing.T) {
 			"  " + sgr_color_1 + "var.input_with_underscores" + sgr_reset + " (required)\n" +
 			"  " + sgr_color_2 + "A variable with underscores." + sgr_reset + "\n" +
 			"\n" +
+			"  " + sgr_color_1 + "var.input-with-pipe" + sgr_reset + " (\"v1\")\n" +
+			"  " + sgr_color_2 + "It includes v1 | v2 | v3" + sgr_reset + "\n" +
+			"\n" +
 			"\n" +
 			"\n" +
 			"  " + sgr_color_1 + "output.unquoted" + sgr_reset + "\n" +
@@ -177,8 +184,9 @@ func TestPrettyWithWithAggregateTypeDefaults(t *testing.T) {
 func TestPrettyWithSortByName(t *testing.T) {
 	doc := doc.TestDoc(t, "..")
 
-	var settings settings.Settings
-	settings.Add(print.WithSortByName)
+	var settings = &_settings.Settings{
+		SortByName: true,
+	}
 
 	actual, err := pretty.Print(doc, settings)
 	if err != nil {
@@ -207,6 +215,9 @@ func TestPrettyWithSortByName(t *testing.T) {
 			"  }\n" +
 			"}\n" +
 			"\n" +
+			"\n" +
+			"  " + sgr_color_1 + "var.input-with-pipe" + sgr_reset + " (\"v1\")\n" +
+			"  " + sgr_color_2 + "It includes v1 | v2 | v3" + sgr_reset + "\n" +
 			"\n" +
 			"  " + sgr_color_1 + "var.input_with_underscores" + sgr_reset + " (required)\n" +
 			"  " + sgr_color_2 + "A variable with underscores." + sgr_reset + "\n" +
@@ -260,9 +271,10 @@ func TestPrettyWithSortByName(t *testing.T) {
 func TestPrettyWithSortInputsByRequired(t *testing.T) {
 	doc := doc.TestDoc(t, "..")
 
-	var settings settings.Settings
-	settings.Add(print.WithSortByName)
-	settings.Add(print.WithSortInputsByRequired)
+	var settings = &_settings.Settings{
+		SortByName:           true,
+		SortInputsByRequired: true,
+	}
 
 	actual, err := pretty.Print(doc, settings)
 	if err != nil {
@@ -306,6 +318,9 @@ func TestPrettyWithSortInputsByRequired(t *testing.T) {
 			"\n" +
 			"  " + sgr_color_1 + "var.unquoted" + sgr_reset + " (required)\n" +
 			"  " + sgr_color_2 + "" + sgr_reset + "\n" +
+			"\n" +
+			"  " + sgr_color_1 + "var.input-with-pipe" + sgr_reset + " (\"v1\")\n" +
+			"  " + sgr_color_2 + "It includes v1 | v2 | v3" + sgr_reset + "\n" +
 			"\n" +
 			"  " + sgr_color_1 + "var.list-1" + sgr_reset + " (<list>)\n" +
 			"  " + sgr_color_2 + "It's list number one." + sgr_reset + "\n" +
